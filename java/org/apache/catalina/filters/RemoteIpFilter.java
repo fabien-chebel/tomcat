@@ -1065,6 +1065,7 @@ public class RemoteIpFilter extends GenericFilter {
 
         if (getInitParameter(INTERNAL_PROXIES_MASKS_PARAMETER) != null) {
             setInternalProxiesMasks(getInitParameter(INTERNAL_PROXIES_MASKS_PARAMETER));
+            setInternalProxies(null);
         }
 
         if (getInitParameter(PROTOCOL_HEADER_PARAMETER) != null) {
@@ -1105,6 +1106,7 @@ public class RemoteIpFilter extends GenericFilter {
 
         if (getInitParameter(TRUSTED_PROXIES_MASKS_PARAMETER) != null) {
             setTrustedProxiesMasks(getInitParameter(TRUSTED_PROXIES_MASKS_PARAMETER));
+            setTrustedProxies(null);
         }
 
         if (getInitParameter(HTTP_SERVER_PORT_PARAMETER) != null) {
