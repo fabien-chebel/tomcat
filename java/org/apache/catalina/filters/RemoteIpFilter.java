@@ -1016,6 +1016,10 @@ public class RemoteIpFilter extends GenericFilter {
         return internalProxies;
     }
 
+    public List<NetMask> getInternalProxiesMasks() {
+        return internalProxiesMasks;
+    }
+
     public String getProtocolHeader() {
         return protocolHeader;
     }

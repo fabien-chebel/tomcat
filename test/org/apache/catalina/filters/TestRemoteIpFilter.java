@@ -18,8 +18,11 @@ package org.apache.catalina.filters;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,6 +40,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.apache.catalina.util.NetMask;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -866,6 +870,40 @@ public class TestRemoteIpFilter extends TomcatBaseTest {
 
     private void doTestPattern(Pattern pattern, String input, boolean expectedMatch) {
         boolean match = pattern.matcher(input).matches();
+        Assert.assertEquals(input, Boolean.valueOf(expectedMatch), Boolean.valueOf(match));
+    }
+
+    @Test
+    public void testInternalProxiesMasks() {
+        RemoteIpFilter remoteIpFilter = new RemoteIpFilter();
+        List<NetMask> masks = remoteIpFilter.getInternalProxiesMasks();
+
+        doTestMasks(masks, "8.8.8.8", false);
+        doTestMasks(masks, "100.62.0.0", false);
+        doTestMasks(masks, "100.63.255.255", false);
+        doTestMasks(masks, "100.64.0.0", true);
+        doTestMasks(masks, "100.65.0.0", true);
+        doTestMasks(masks, "100.68.0.0", true);
+        doTestMasks(masks, "100.72.0.0", true);
+        doTestMasks(masks, "100.88.0.0", true);
+        doTestMasks(masks, "100.95.0.0", true);
+        doTestMasks(masks, "100.102.0.0", true);
+        doTestMasks(masks, "100.110.0.0", true);
+        doTestMasks(masks, "100.126.0.0", true);
+        doTestMasks(masks, "100.127.255.255", true);
+        doTestMasks(masks, "100.128.0.0", false);
+        doTestMasks(masks, "100.130.0.0", false);
+
+    }
+
+    private void doTestMasks(List<NetMask> masks, String input, boolean expectedMatch) {
+        boolean match = masks.stream().anyMatch(mask -> {
+            try {
+                return mask.matches(InetAddress.getByName(input));
+            } catch (UnknownHostException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
         Assert.assertEquals(input, Boolean.valueOf(expectedMatch), Boolean.valueOf(match));
     }
 }
